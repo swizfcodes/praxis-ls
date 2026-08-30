@@ -4,6 +4,8 @@ import { useBranding } from "@/app/branding";
 import { TrackWidget } from "./track-widget";
 import { RouteGraphic } from "./graphics";
 import { p } from "@/lib/base-path";
+import { Band } from "@/components/ui/band";
+import { SectionHead } from "@/components/ui/section-head";
 
 /**
  * The hero — a dark plate, one promise, two ways out.
@@ -51,7 +53,7 @@ export function Hero() {
   const image = branding?.siteHeroUrl || login?.backgroundUrl || null;
 
   return (
-    <section className="band-hero relative overflow-hidden">
+    <Band surface="hero" className="relative overflow-hidden">
       {image ? (
         <>
           <img
@@ -114,17 +116,17 @@ export function Hero() {
         <RouteGraphic className="h-full w-full text-[var(--hero-foreground)]" />
       </div>
 
-      <div className="wrap relative grid items-center gap-10 py-14 md:py-20 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:py-24">
+      <div className="relative grid items-center gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
         <div className="max-w-prose">
-          <p className="eyebrow text-[var(--brand-orange)]">
-            {t("site.hero.eyebrow")}
-          </p>
-          <h1 className="hero-title mt-4 text-[var(--hero-foreground)]">
-            {t("site.hero.title")}
-          </h1>
-          <p className="mt-5 max-w-measure text-lg text-[var(--hero-muted)]">
-            {t("site.hero.sub")}
-          </p>
+          <SectionHead
+            eyebrow={t("site.hero.eyebrow")}
+            title={t("site.hero.titleBeforeAccent")}
+            accent={t("site.hero.titleAccent")}
+            lead={t("site.hero.sub")}
+            titleAs="h1"
+            hero
+            className="text-[var(--hero-foreground)] [&>p:first-child]:text-[rgb(var(--brand-orange))] [&>p:last-child]:text-[var(--hero-muted)] [&_p:last-child]:text-lg"
+          />
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
             {/* A plain anchor for the in-page jump: the browser's own
@@ -165,6 +167,6 @@ export function Hero() {
           </Link>
         </div>
       </div>
-    </section>
+    </Band>
   );
 }

@@ -7,19 +7,29 @@ import {
   pickList,
   pickSlug,
   pickText,
+  type ServiceCard,
   type ServiceProfile,
 } from "@/lib/services-api";
 import { PublicApiError, messageFor } from "@/lib/api";
 import { currentLocale, getLang, setLang, tStatic } from "@/lib/i18n";
 import { usePublishedServices } from "@/lib/use-services";
 import { PageContainer, PageShell } from "@/components/site/page-shell";
-import { MediaCard, MoreLink, Section } from "@/components/site/section";
+import { MediaCard, MoreLink } from "@/components/site/section";
+import { Band } from "@/components/ui/band";
+import { IconTile } from "@/components/ui/icon-tile";
+import { SectionHead } from "@/components/ui/section-head";
+import { Reveal } from "@/components/ui/reveal";
 import { Card } from "@/components/ui/card";
 import { Panel } from "@/components/ui/panel";
 import { ButtonLink } from "@/components/ui/button";
 import { EmptyState, ErrorState } from "@/components/state";
 import { PageSkeleton } from "@/components/ui/skeleton";
-import { CheckIcon, ChevronDownIcon } from "@/components/ui/icons";
+import {
+  ArrowRightIcon,
+  CheckIcon,
+  ChevronDownIcon,
+  DocumentIcon,
+} from "@/components/ui/icons";
 import { Markdown } from "@/components/ui/markdown";
 import { QuoteWizard } from "@/components/site/quote-wizard";
 import { useDocumentMeta } from "@/lib/use-document-meta";
@@ -59,27 +69,23 @@ export function ServicesIndexPage() {
 
   return (
     <PageShell label={t("site.servicesPage.title")}>
-      <Section
-        eyebrow={t("site.services.eyebrow")}
-        title={t("site.servicesPage.title")}
-        lead={t("site.servicesPage.sub")}
-        // Index page with no hero band — this is the page h1.
-        titleAs="h1"
-      >
+      <Band surface="plain">
+        <SectionHead
+          eyebrow={t("site.services.eyebrow")}
+          title={t("site.servicesPage.title")}
+          lead={t("site.servicesPage.sub")}
+          titleAs="h1"
+        />
         {services.length ? (
-          <div className="grid gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
-            {services.map((s) => (
-              <MediaCard
-                key={s.service_type_id}
-                image={s.cover_url}
-                imageAlt={pickText(s, "name", lang) || ""}
-                eyebrow={s.published_month || undefined}
-                title={pickText(s, "name", lang) || pickSlug(s, lang)}
-                to={p(`/services/${encodeURIComponent(pickSlug(s, lang))}`)}
-                linkLabel={t("site.services.more")}
-              >
-                {pickText(s, "short_description", lang)}
-              </MediaCard>
+          <div className="mt-8 grid gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
+            {services.map((s, i) => (
+              <Reveal key={s.service_type_id} delay={i % 3} className="h-full">
+                <ServiceTile
+                  service={s}
+                  lang={lang}
+                  more={t("site.services.more")}
+                />
+              </Reveal>
             ))}
           </div>
         ) : failed || disabled ? (
@@ -94,8 +100,71 @@ export function ServicesIndexPage() {
         ) : (
           <PageSkeleton rows={3} cols={3} />
         )}
-      </Section>
+      </Band>
     </PageShell>
+  );
+}
+
+function serviceIcon(iconUrl: string | null) {
+  return function ServiceIcon({
+    size,
+    className,
+  }: {
+    size?: number;
+    className?: string;
+  }) {
+    return iconUrl ? (
+      <img
+        src={iconUrl}
+        alt=""
+        width={size}
+        height={size}
+        className={className}
+      />
+    ) : (
+      <DocumentIcon size={size} className={className} />
+    );
+  };
+}
+
+function ServiceTile({
+  service,
+  lang,
+  more,
+}: {
+  service: ServiceCard;
+  lang: "en" | "fr";
+  more: string;
+}) {
+  const name = pickText(service, "name", lang) || pickSlug(service, lang);
+  const description = pickText(service, "short_description", lang);
+  const Icon = serviceIcon(service.icon_url);
+  return (
+    <Link
+      to={p(`/services/${encodeURIComponent(pickSlug(service, lang))}`)}
+      className="lux-card group flex h-full flex-col p-5 transition-shadow hover:shadow-[var(--shadow-m)]"
+    >
+      <div className="flex items-start justify-between gap-4">
+        <IconTile icon={Icon} />
+        {service.published_month ? (
+          <span className="micro pt-1">{service.published_month}</span>
+        ) : null}
+      </div>
+      <h2 className="mt-5 text-title font-semibold leading-snug tracking-tight">
+        {name}
+      </h2>
+      {description ? (
+        <p className="mt-2 flex-1 text-sm text-muted-foreground">
+          {description}
+        </p>
+      ) : (
+        <span className="flex-1" />
+      )}
+      <span className="more-link mt-5 text-sm">
+        {more}
+        <ArrowRightIcon size={16} />
+      </span>
+    </Link>
   );
 }
 
@@ -183,18 +252,16 @@ export function ServiceDetailPage() {
   if (!profile) {
     return (
       <PageShell label={t("site.servicesPage.unavailable")}>
-        <Section title={t("site.servicesPage.unavailable")}>
+        <Band surface="plain" title={t("site.servicesPage.unavailable")}>
           <div className="max-w-prose">
             <p className="text-sm text-muted-foreground">
               {t("site.servicesPage.empty")}
             </p>
             <div className="mt-5">
-              <MoreLink to={p("/services")}>
-                {t("site.services.all")}
-              </MoreLink>
+              <MoreLink to={p("/services")}>{t("site.services.all")}</MoreLink>
             </div>
           </div>
-        </Section>
+        </Band>
       </PageShell>
     );
   }
@@ -220,8 +287,8 @@ export function ServiceDetailPage() {
 
   return (
     <PageShell label={name}>
-      <section className="band">
-        <PageContainer size="reading">
+      <Band surface="plain">
+        <div className="max-w-reading">
           <nav aria-label={t("site.services.eyebrow")} className="mb-6">
             <Link
               to={p("/services")}
@@ -230,13 +297,15 @@ export function ServiceDetailPage() {
               {t("site.servicesPage.back")}
             </Link>
           </nav>
-          <p className="eyebrow">{t("site.services.eyebrow")}</p>
-          <h1 className="mt-3 text-h1 font-semibold leading-[1.08] tracking-tight">
-            {name}
-          </h1>
-          {shortText ? (
-            <p className="mt-4 text-lg text-muted-foreground">{shortText}</p>
-          ) : null}
+          <div className="flex items-start gap-5">
+            <IconTile icon={serviceIcon(profile.icon_url)} size="lg" />
+            <SectionHead
+              eyebrow={t("site.services.eyebrow")}
+              title={name}
+              lead={shortText || undefined}
+              titleAs="h1"
+            />
+          </div>
           <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
             {month ? (
               <span className="text-muted-foreground">
@@ -264,10 +333,10 @@ export function ServiceDetailPage() {
               </button>
             ) : null}
           </div>
-        </PageContainer>
-      </section>
+        </div>
+      </Band>
 
-      <Section divided>
+      <Band surface="muted" divided>
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
           <div className="min-w-0 max-w-prose">
             {longText ? (
@@ -347,10 +416,10 @@ export function ServiceDetailPage() {
             </ButtonLink>
           </div>
         </div>
-      </Section>
+      </Band>
 
       {faq.length > 0 && (
-        <Section variant="muted" title={t("site.servicesPage.faq")} divided>
+        <Band surface="plain" title={t("site.servicesPage.faq")} divided>
           <div className="max-w-prose divide-y divide-[var(--border)]">
             {faq.map((f) => (
               <details key={f.faq_id} className="group py-4">
@@ -364,11 +433,11 @@ export function ServiceDetailPage() {
               </details>
             ))}
           </div>
-        </Section>
+        </Band>
       )}
 
       {related.length > 0 && (
-        <Section title={t("site.servicesPage.related")} divided>
+        <Band surface="muted" title={t("site.servicesPage.related")} divided>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {related.map((r) => (
               <MediaCard
@@ -379,10 +448,11 @@ export function ServiceDetailPage() {
               />
             ))}
           </div>
-        </Section>
+        </Band>
       )}
 
-      <Section
+      <Band
+        surface="plain"
         id="quote"
         title={t("site.quote.title")}
         lead={t("site.quote.sub")}
@@ -391,7 +461,7 @@ export function ServiceDetailPage() {
         <Card padded className="max-w-reading">
           <QuoteWizard />
         </Card>
-      </Section>
+      </Band>
     </PageShell>
   );
 }

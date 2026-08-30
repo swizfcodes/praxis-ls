@@ -5,7 +5,6 @@ import { Pill, type Tone } from "@/components/ui/pill";
 import {
   BoxIcon,
   CheckIcon,
-  ClockIcon,
   PlaneIcon,
   ShipIcon,
   TruckIcon,
@@ -131,7 +130,7 @@ export function MilestoneMarker({
       {done ? (
         <CheckIcon size={13} />
       ) : current ? (
-        <ClockIcon size={13} />
+        <TruckIcon size={13} />
       ) : (
         <span className="num text-[10px] font-semibold">{index + 1}</span>
       )}

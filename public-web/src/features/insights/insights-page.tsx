@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/pill";
 import { DocumentIcon } from "@/components/ui/icons";
 import { IconTile } from "@/components/ui/icon-tile";
+import { Reveal } from "@/components/ui/reveal";
 import { SectionHead } from "@/components/ui/section-head";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState, ErrorState, LoadingState } from "@/components/state";
@@ -118,11 +119,15 @@ export function InsightsPage() {
             lead={t("site.insights.sub")}
             align="center"
             titleAs="h1"
+            hero
             className="mt-3 text-[var(--hero-foreground)] [&_p]:text-[var(--hero-muted)]"
           />
 
           {state.kind === "ready" && state.view.tags.length > 0 && (
-            <nav aria-label={t("site.insights.filterLabel")} className="mt-8 w-full">
+            <nav
+              aria-label={t("site.insights.filterLabel")}
+              className="mt-8 w-full"
+            >
               <ul className="flex flex-wrap justify-center gap-2">
                 <li>
                   <FilterButton active={!tag} onClick={() => choose("")}>
@@ -136,7 +141,9 @@ export function InsightsPage() {
                       onClick={() => choose(entry.tag)}
                     >
                       {entry.tag}
-                      <span className="num ml-1.5 text-xs opacity-70">{entry.count}</span>
+                      <span className="num ml-1.5 text-xs opacity-70">
+                        {entry.count}
+                      </span>
                     </FilterButton>
                   </li>
                 ))}
@@ -167,12 +174,22 @@ export function InsightsPage() {
           <ErrorState
             message={state.message}
             requestId={state.requestId}
-            action={<Button onClick={() => setNonce((n) => n + 1)}>{t("common.retry")}</Button>}
+            action={
+              <Button onClick={() => setNonce((n) => n + 1)}>
+                {t("common.retry")}
+              </Button>
+            }
           />
         ) : state.view.articles.length === 0 ? (
           <EmptyState
-            title={tag ? t("site.insights.noneForTag") : t("site.insights.none")}
-            hint={tag ? t("site.insights.noneForTagHint") : t("site.insights.noneHint")}
+            title={
+              tag ? t("site.insights.noneForTag") : t("site.insights.none")
+            }
+            hint={
+              tag
+                ? t("site.insights.noneForTagHint")
+                : t("site.insights.noneHint")
+            }
             action={
               tag ? (
                 <Button variant="outline" onClick={() => choose("")}>
@@ -184,9 +201,11 @@ export function InsightsPage() {
         ) : (
           <>
             <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {state.view.articles.map((a) => (
+              {state.view.articles.map((a, i) => (
                 <li key={a.slug_fr || a.slug_en || insightTitle(a, lang)}>
-                  <ArticleCard article={a} lang={lang} />
+                  <Reveal delay={i % 3} className="h-full">
+                    <ArticleCard article={a} lang={lang} />
+                  </Reveal>
                 </li>
               ))}
             </ul>
@@ -206,10 +225,16 @@ export function InsightsPage() {
                 <p className="text-sm text-muted-foreground">
                   {t("site.insights.pageOf", {
                     page,
-                    total: Math.max(1, Math.ceil(state.view.total / state.view.per_page)),
+                    total: Math.max(
+                      1,
+                      Math.ceil(state.view.total / state.view.per_page),
+                    ),
                   })}
                 </p>
-                <Button disabled={!state.view.has_more} onClick={() => goToPage(page + 1)}>
+                <Button
+                  disabled={!state.view.has_more}
+                  onClick={() => goToPage(page + 1)}
+                >
                   {t("site.insights.next")}
                 </Button>
               </nav>
@@ -241,7 +266,7 @@ function FilterButton({
       className={cn(
         "inline-flex items-center rounded-full border px-3.5 py-1.5 text-sm transition-colors",
         active
-          ? "border-[var(--brand-orange)] bg-[var(--brand-orange)] font-semibold text-[var(--primary-foreground)]"
+          ? "border-[rgb(var(--brand-orange))] bg-[rgb(var(--brand-orange))] font-semibold text-[var(--primary-foreground)]"
           : "hover:bg-[rgb(var(--ink)/0.06)]",
       )}
     >
@@ -259,7 +284,13 @@ function FilterButton({
  * card with no image. The same rule `portfolio-api` states: never render media
  * this app did not get a URL for.
  */
-function ArticleCard({ article, lang }: { article: InsightCard; lang: string }) {
+function ArticleCard({
+  article,
+  lang,
+}: {
+  article: InsightCard;
+  lang: string;
+}) {
   const [coverOk, setCoverOk] = React.useState(true);
   const slug = insightSlug(article, lang);
   const title = insightTitle(article, lang);
@@ -296,7 +327,9 @@ function ArticleCard({ article, lang }: { article: InsightCard; lang: string }) 
           {title}
         </h2>
         {excerpt && (
-          <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">{excerpt}</p>
+          <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">
+            {excerpt}
+          </p>
         )}
         {article.author && (
           <p className="mt-4 text-xs text-muted-foreground">

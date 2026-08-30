@@ -5,6 +5,7 @@ import { Honeypot, Input, Select, Textarea } from "@/components/ui/field";
 import { PlaceInput } from "@/components/ui/place-input";
 import { FileInput, type Attachment } from "@/components/ui/file-input";
 import { Stepper, type Step } from "@/components/ui/stepper";
+import { SelectCard } from "@/components/ui/select-card";
 import { ErrorState, ModeIcon, SuccessState } from "@/components/state";
 import { ArrowRightIcon } from "@/components/ui/icons";
 import { quoteRequests, type QuoteRequest } from "@/lib/intake-api";
@@ -12,7 +13,6 @@ import type { PlacePick } from "@/lib/places-api";
 import { useIntake } from "@/lib/use-intake";
 import { useWizardDraft } from "@/lib/use-wizard-draft";
 import { getLang } from "@/lib/i18n";
-import { cn } from "@/lib/cn";
 import type { ServiceCard } from "@/lib/services-api";
 import { pickText, pickSlug } from "@/lib/services-api";
 
@@ -336,60 +336,18 @@ export function QuoteWizard({ services = [] }: { services?: ServiceCard[] }) {
             */}
             <div className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {MODES.map((m) => (
-                <label key={m} className="group relative block cursor-pointer">
-                  <input
-                    type="radio"
-                    name="quote-mode"
-                    value={m}
-                    checked={f.mode === m}
-                    onChange={() => set("mode", m)}
-                    className="peer sr-only"
-                  />
-                  <span
-                    className={cn(
-                      "flex h-full flex-col rounded-[var(--radius)] border p-4 transition-all duration-200",
-                      "peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--brand-orange)]",
-                      f.mode === m
-                        ? // Three things change at once, deliberately. A
-                          // selected state carried by border colour alone is
-                          // invisible on a phone in sunlight and invisible to
-                          // anyone who does not see that hue — which is what our
-                          // first version did.
-                          "border-[var(--brand-orange)] bg-[rgb(var(--brand-orange)/0.06)] shadow-[0_0_0_1px_var(--brand-orange),0_8px_24px_-12px_var(--brand-orange)]"
-                        : "hover:border-[rgb(var(--ink)/0.25)] hover:bg-[rgb(var(--ink)/0.03)]",
-                    )}
-                  >
-                    {/* The icon TILE. Their cards fill it on selection, and the
-                        filled square is what reads as "chosen" from across a
-                        room — the glyph alone does not. */}
-                    <span
-                      aria-hidden
-                      className={cn(
-                        "mb-3 inline-flex h-11 w-11 items-center justify-center rounded-[calc(var(--radius)-2px)] transition-colors",
-                        f.mode === m
-                          ? "bg-[var(--brand-orange)] text-[var(--primary-foreground)]"
-                          : "bg-[rgb(var(--ink)/0.06)] text-muted-foreground",
-                      )}
-                    >
-                      <ModeIcon mode={m} size={22} />
-                    </span>
-                    <span
-                      className={cn(
-                        "font-medium leading-snug",
-                        f.mode === m && "font-semibold",
-                      )}
-                    >
-                      {t(`site.quote.mode${m}`)}
-                    </span>
-                    {/* The line ours was missing entirely. A prospect who does
-                        not know whether "By road or rail" covers a Douala →
-                        N'Djamena run picks nothing, and picking nothing is where
-                        this form loses them. */}
-                    <span className="mt-1 text-sm text-muted-foreground">
-                      {t(`site.quote.mode${m}Hint`)}
-                    </span>
-                  </span>
-                </label>
+                <SelectCard
+                  key={m}
+                  name="quote-mode"
+                  value={m}
+                  checked={f.mode === m}
+                  onChange={() => set("mode", m)}
+                  icon={({ size, className }) => (
+                    <ModeIcon mode={m} size={size} className={className} />
+                  )}
+                  title={t(`site.quote.mode${m}`)}
+                  description={t(`site.quote.mode${m}Hint`)}
+                />
               ))}
             </div>
             {err("mode") && (
@@ -518,7 +476,7 @@ export function QuoteWizard({ services = [] }: { services?: ServiceCard[] }) {
                   type="checkbox"
                   checked={f.project_cargo_flag}
                   onChange={(e) => set("project_cargo_flag", e.target.checked)}
-                  className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--brand-orange)]"
+                  className="mt-0.5 h-4 w-4 shrink-0 accent-[rgb(var(--brand-orange))]"
                 />
                 <span className="min-w-0">
                   <span className="block font-medium">{t("site.quote.projectCargo")}</span>

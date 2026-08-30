@@ -17,6 +17,7 @@ export function SectionHead({
   lead,
   align = "left",
   titleAs = "h2",
+  hero = false,
   className,
 }: {
   eyebrow?: React.ReactNode;
@@ -26,6 +27,8 @@ export function SectionHead({
   lead?: React.ReactNode;
   align?: "left" | "center";
   titleAs?: HeadingTag;
+  /** Use the display-sized title treatment for a hero heading. */
+  hero?: boolean;
   className?: string;
 }) {
   const Tag = titleAs;
@@ -45,20 +48,25 @@ export function SectionHead({
           {eyebrow}
         </p>
       )}
-      <Tag
-        className={cn(
-          titleAs === "h1" ? "hero-title" : "section-title",
-          "mt-2",
-        )}
-      >
-        {title}
-        {accent && (
-          <>
-            {" "}
-            <span className="text-[rgb(var(--brand-orange))]">{accent}</span>
-          </>
-        )}
-      </Tag>
+      {title && (
+        <Tag className={cn(hero ? "hero-title" : "section-title", "mt-2")}>
+          {accent ? (
+            <>
+              <span className="sr-only">
+                {title} {accent}
+              </span>
+              <span aria-hidden="true">
+                {title}{" "}
+                <span className="text-[rgb(var(--brand-orange))]">
+                  {accent}
+                </span>
+              </span>
+            </>
+          ) : (
+            title
+          )}
+        </Tag>
+      )}
       {lead && (
         <p
           className={cn(

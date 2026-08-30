@@ -10,7 +10,10 @@ import {
 import { PublicApiError, messageFor } from "@/lib/api";
 import { currentLocale, tStatic } from "@/lib/i18n";
 import { PageContainer, PageShell } from "@/components/site/page-shell";
-import { MediaCard, MoreLink, Section } from "@/components/site/section";
+import { MediaCard, MoreLink } from "@/components/site/section";
+import { Band } from "@/components/ui/band";
+import { SectionHead } from "@/components/ui/section-head";
+import { Reveal } from "@/components/ui/reveal";
 import { Card } from "@/components/ui/card";
 import { Panel } from "@/components/ui/panel";
 import { EmptyState, ErrorState } from "@/components/state";
@@ -72,17 +75,17 @@ export function PortfolioIndexPage() {
 
   return (
     <PageShell label={t("site.portfolioPage.title")}>
-      <Section
-        eyebrow={t("site.proof.eyebrow")}
-        title={t("site.portfolioPage.title")}
-        lead={t("site.portfolioPage.sub")}
-        // Index page with no hero band — this is the page h1.
-        titleAs="h1"
-      >
+      <Band surface="plain">
+        <SectionHead
+          eyebrow={t("site.proof.eyebrow")}
+          title={t("site.portfolioPage.title")}
+          lead={t("site.portfolioPage.sub")}
+          titleAs="h1"
+        />
         {error ? (
           <ErrorState message={error} />
         ) : rows === null ? (
-          <div className="grid gap-5 md:grid-cols-3">
+          <div className="mt-8 grid gap-5 md:grid-cols-3">
             {[0, 1, 2].map((i) => (
               <Skeleton key={i} className="h-64" />
             ))}
@@ -93,23 +96,26 @@ export function PortfolioIndexPage() {
             hint={t("site.proof.empty")}
           />
         ) : (
-          <div className="grid gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
-            {rows.map((s) => (
-              <MediaCard
-                key={s.slug}
-                image={s.cover_url}
-                imageAlt={s.client_name || s.title}
-                eyebrow={s.client_name || undefined}
-                title={s.title}
-                to={p(`/portfolio/${encodeURIComponent(s.slug)}`)}
-                linkLabel={t("site.proof.more")}
-              >
-                {s.service_category ? <Chip>{s.service_category}</Chip> : null}
-              </MediaCard>
+          <div className="mt-8 grid gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
+            {rows.map((s, i) => (
+              <Reveal key={s.slug} delay={i % 3} className="h-full">
+                <MediaCard
+                  image={s.cover_url}
+                  imageAlt={s.client_name || s.title}
+                  eyebrow={s.client_name || undefined}
+                  title={s.title}
+                  to={p(`/portfolio/${encodeURIComponent(s.slug)}`)}
+                  linkLabel={t("site.proof.more")}
+                >
+                  {s.service_category ? (
+                    <Chip>{s.service_category}</Chip>
+                  ) : null}
+                </MediaCard>
+              </Reveal>
             ))}
           </div>
         )}
-      </Section>
+      </Band>
     </PageShell>
   );
 }
@@ -178,7 +184,7 @@ export function PortfolioStoryPage() {
   if (!story) {
     return (
       <PageShell label={t("site.portfolioPage.unavailable")}>
-        <Section title={t("site.portfolioPage.unavailable")}>
+        <Band surface="plain" title={t("site.portfolioPage.unavailable")}>
           <div className="max-w-prose">
             <p className="text-sm text-muted-foreground">
               {t("site.portfolioPage.empty")}
@@ -189,7 +195,7 @@ export function PortfolioStoryPage() {
               </MoreLink>
             </div>
           </div>
-        </Section>
+        </Band>
       </PageShell>
     );
   }
@@ -211,8 +217,8 @@ export function PortfolioStoryPage() {
   return (
     <PageShell label={story.title}>
       <article>
-        <section className="band">
-          <PageContainer size="reading">
+        <Band surface="plain">
+          <div className="max-w-reading">
             <nav aria-label={t("site.portfolioPage.title")} className="mb-6">
               <Link
                 to={p("/portfolio")}
@@ -228,17 +234,12 @@ export function PortfolioStoryPage() {
                 className="mb-8 aspect-[21/9] w-full rounded-[calc(var(--radius)+4px)] border object-cover"
               />
             ) : null}
-            <p className="eyebrow">
-              {story.service_category || t("site.proof.eyebrow")}
-            </p>
-            <h1 className="mt-3 text-h1 font-semibold leading-[1.08] tracking-tight">
-              {story.title}
-            </h1>
-            {story.headline ? (
-              <p className="mt-4 text-lg text-muted-foreground">
-                {story.headline}
-              </p>
-            ) : null}
+            <SectionHead
+              eyebrow={story.service_category || t("site.proof.eyebrow")}
+              title={story.title}
+              lead={story.headline || undefined}
+              titleAs="h1"
+            />
             <div className="mt-5 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
               {story.client_name ? <Chip>{story.client_name}</Chip> : null}
               {month ? (
@@ -247,10 +248,10 @@ export function PortfolioStoryPage() {
                 </span>
               ) : null}
             </div>
-          </PageContainer>
-        </section>
+          </div>
+        </Band>
 
-        <Section divided>
+        <Band surface="muted" divided>
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
             <div className="min-w-0 max-w-prose space-y-8">
               {story.executive_summary ? (
@@ -328,7 +329,7 @@ export function PortfolioStoryPage() {
               <MoreLink to={p("#quote")}>{t("site.hero.cta")}</MoreLink>
             </div>
           </div>
-        </Section>
+        </Band>
       </article>
     </PageShell>
   );

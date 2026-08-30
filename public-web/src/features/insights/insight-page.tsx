@@ -15,8 +15,9 @@ import { dateFmt } from "@/lib/format";
 import { p } from "@/lib/base-path";
 import { useDocumentMeta } from "@/lib/use-document-meta";
 import { PageShell } from "@/components/site/page-shell";
-import { Section } from "@/components/site/section";
+import { Band } from "@/components/ui/band";
 import { Button, ButtonLink } from "@/components/ui/button";
+import { SectionHead } from "@/components/ui/section-head";
 import { Chip } from "@/components/ui/pill";
 import { Markdown } from "@/components/ui/markdown";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -81,7 +82,9 @@ export function InsightPage() {
       ? (lang === "fr" ? article.meta_title_fr : article.meta_title_en) || title
       : t("site.insights.title"),
     description: article
-      ? (lang === "fr" ? article.meta_description_fr : article.meta_description_en) ||
+      ? (lang === "fr"
+          ? article.meta_description_fr
+          : article.meta_description_en) ||
         insightExcerpt(article, lang) ||
         undefined
       : undefined,
@@ -89,15 +92,19 @@ export function InsightPage() {
     // and pointing `hreflang="en"` at a French page is worse than saying nothing.
     alternates: article
       ? {
-          fr: article.slug_fr ? p("/insights/" + encodeURIComponent(article.slug_fr)) : undefined,
-          en: article.slug_en ? p("/insights/" + encodeURIComponent(article.slug_en)) : undefined,
+          fr: article.slug_fr
+            ? p("/insights/" + encodeURIComponent(article.slug_fr))
+            : undefined,
+          en: article.slug_en
+            ? p("/insights/" + encodeURIComponent(article.slug_en))
+            : undefined,
         }
       : undefined,
   });
 
   return (
     <PageShell label={title || t("site.insights.title")} footer>
-      <Section>
+      <Band surface="plain">
         <p className="mb-6">
           <Link
             to={p("/insights")}
@@ -108,7 +115,10 @@ export function InsightPage() {
         </p>
 
         {state.kind === "loading" ? (
-          <LoadingState label={t("site.insights.loadingArticle")} className="max-w-prose">
+          <LoadingState
+            label={t("site.insights.loadingArticle")}
+            className="max-w-prose"
+          >
             <Skeleton className="h-3 w-32" />
             <Skeleton className="mt-4 h-9 w-full" />
             <Skeleton className="mt-2 h-9 w-3/4" />
@@ -132,12 +142,16 @@ export function InsightPage() {
           <ErrorState
             message={state.message}
             requestId={state.requestId}
-            action={<Button onClick={() => setNonce((n) => n + 1)}>{t("common.retry")}</Button>}
+            action={
+              <Button onClick={() => setNonce((n) => n + 1)}>
+                {t("common.retry")}
+              </Button>
+            }
           />
         ) : (
           <Article article={state.article} lang={lang} title={title} />
         )}
-      </Section>
+      </Band>
     </PageShell>
   );
 }
@@ -159,7 +173,12 @@ function Article({
   return (
     <article className="mx-auto max-w-prose">
       <header>
-        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+        <SectionHead
+          eyebrow={t("site.insights.kicker")}
+          title={title}
+          titleAs="h1"
+        />
+        <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
           {article.published_at && (
             <time dateTime={article.published_at} className="num">
               {dateFmt(article.published_at)}
@@ -169,16 +188,15 @@ function Article({
             <Chip key={tg}>{tg}</Chip>
           ))}
         </div>
-        <h1 className="mt-3 font-display text-h1 font-semibold leading-tight tracking-tight">
-          {title}
-        </h1>
         {article.author && (
           <p className="mt-4 text-sm text-muted-foreground">
             {/* The name is a fact from a staff record, not a translated string —
                 which is the bug on theirs, where "By Joseph MOUKOKO" lives
                 inside a translation key. Only the word "by" is translated. */}
             {t("site.insights.by")}{" "}
-            <span className="font-medium text-foreground">{article.author.name}</span>
+            <span className="font-medium text-foreground">
+              {article.author.name}
+            </span>
             {article.author.title ? " · " + article.author.title : ""}
           </p>
         )}
@@ -201,7 +219,9 @@ function Article({
         // Publishing refuses an article with no body, so this is only reachable
         // for a piece written in the OTHER language — say so rather than
         // printing a heading over white space.
-        <p className="mt-8 text-muted-foreground">{t("site.insights.otherLanguageOnly")}</p>
+        <p className="mt-8 text-muted-foreground">
+          {t("site.insights.otherLanguageOnly")}
+        </p>
       )}
     </article>
   );

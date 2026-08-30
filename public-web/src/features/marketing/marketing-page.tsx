@@ -6,17 +6,16 @@ import { usePublishedServices } from "@/lib/use-services";
 import { pickSlug, pickText } from "@/lib/services-api";
 import { listStories, type PortfolioCard } from "@/lib/portfolio-api";
 import { Hero } from "@/components/site/hero";
-import {
-  MediaCard,
-  MoreLink,
-  Section,
-  StepList,
-} from "@/components/site/section";
+import { MediaCard, MoreLink, StepList } from "@/components/site/section";
+import { Band } from "@/components/ui/band";
+import { BadgePill } from "@/components/ui/badge-pill";
+import { SectionHead } from "@/components/ui/section-head";
+import { Reveal } from "@/components/ui/reveal";
 import { PortalPreview } from "@/components/site/graphics";
 import { PageShell } from "@/components/site/page-shell";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowRightIcon } from "@/components/ui/icons";
+import { ArrowRightIcon, DocumentIcon } from "@/components/ui/icons";
 import { QuoteWizard } from "@/components/site/quote-wizard";
 import { ContactForm } from "@/components/site/contact-form";
 import { p } from "@/lib/base-path";
@@ -67,6 +66,31 @@ export function MarketingPage() {
   );
 }
 
+/** Service artwork is already allowlisted by the public API. If a tenant has no
+ *  custom icon, the generic document mark keeps the card from becoming a bare
+ *  text block while remaining honest about the service type. */
+function serviceIcon(iconUrl: string | null) {
+  return function ServiceIcon({
+    size,
+    className,
+  }: {
+    size?: number;
+    className?: string;
+  }) {
+    return iconUrl ? (
+      <img
+        src={iconUrl}
+        alt=""
+        width={size}
+        height={size}
+        className={className}
+      />
+    ) : (
+      <DocumentIcon size={size} className={className} />
+    );
+  };
+}
+
 /** Dict fallback under the tenant's real profiles.
  *
  *  An unconfigured workspace must not launch a homepage with an empty services
@@ -92,6 +116,7 @@ function ServicesBand() {
         // index renders as image cards. `ProofBand` below passes the same field
         // to the same component.
         image: s.cover_url,
+        icon: serviceIcon(s.icon_url),
         to: p(`/services/${pickSlug(s, lang)}`),
       }))
     : tList<{ t: string; d: string }>("site.services.items").map((i) => ({
@@ -101,11 +126,13 @@ function ServicesBand() {
         // The dict fallback describes what a service TYPE does; there is no
         // tenant artwork behind it, and N12 forbids inventing one.
         image: null as string | null,
+        icon: DocumentIcon,
         to: p("#quote"),
       }));
 
   return (
-    <Section
+    <Band
+      surface="plain"
       id="services"
       eyebrow={t("site.services.eyebrow")}
       title={t("site.services.title")}
@@ -118,17 +145,20 @@ function ServicesBand() {
       divided
     >
       <div className="grid gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-4">
-        {items.map((s) => (
-          <MediaCard
-            key={s.key}
-            image={s.image}
-            imageAlt={s.title || ""}
-            title={s.title}
-            to={s.to}
-            linkLabel={t("site.services.more")}
-          >
-            {s.desc}
-          </MediaCard>
+        {items.map((s, i) => (
+          <Reveal key={s.key} delay={i % 3} className="h-full">
+            <MediaCard
+              image={s.image}
+              imageAlt={s.title || ""}
+              icon={s.icon}
+              title={s.title}
+              to={s.to}
+              linkLabel={t("site.services.more")}
+              className="h-full"
+            >
+              {s.desc}
+            </MediaCard>
+          </Reveal>
         ))}
       </div>
       {(disabled || failed) && !services.length ? (
@@ -136,7 +166,7 @@ function ServicesBand() {
           {t("site.servicesPage.empty")}
         </p>
       ) : null}
-    </Section>
+    </Band>
   );
 }
 
@@ -150,16 +180,16 @@ function HowBand() {
     body: s.d,
   }));
   return (
-    <Section
+    <Band
+      surface="muted"
       id="how"
-      variant="muted"
       eyebrow={t("site.how.eyebrow")}
       title={t("site.how.title")}
       lead={t("site.how.sub")}
       divided
     >
       <StepList steps={steps} />
-    </Section>
+    </Band>
   );
 }
 
@@ -179,14 +209,13 @@ function ProofBand() {
   }, []);
 
   return (
-    <Section
+    <Band
+      surface="plain"
       id="work"
       eyebrow={t("site.proof.eyebrow")}
       title={t("site.proof.title")}
       lead={t("site.proof.sub")}
-      aside={
-        <MoreLink to={p("/portfolio")}>{t("site.services.all")}</MoreLink>
-      }
+      aside={<MoreLink to={p("/portfolio")}>{t("site.services.all")}</MoreLink>}
       divided
     >
       {stories === null ? (
@@ -201,24 +230,26 @@ function ProofBand() {
         </p>
       ) : (
         <div className="grid gap-5 md:grid-cols-3">
-          {stories.slice(0, 3).map((s) => (
-            <MediaCard
-              key={s.slug}
-              image={s.cover_url}
-              imageAlt={s.client_name || s.title}
-              eyebrow={s.client_name || undefined}
-              title={s.title}
-              to={p(`/portfolio/${encodeURIComponent(s.slug)}`)}
-              linkLabel={t("site.proof.more")}
-            >
-              {s.published_month ? (
-                <span className="num text-xs">{s.published_month}</span>
-              ) : null}
-            </MediaCard>
+          {stories.slice(0, 3).map((s, i) => (
+            <Reveal key={s.slug} delay={i % 3} className="h-full">
+              <MediaCard
+                image={s.cover_url}
+                imageAlt={s.client_name || s.title}
+                eyebrow={s.client_name || undefined}
+                title={s.title}
+                to={p(`/portfolio/${encodeURIComponent(s.slug)}`)}
+                linkLabel={t("site.proof.more")}
+                className="h-full"
+              >
+                {s.published_month ? (
+                  <span className="num text-xs">{s.published_month}</span>
+                ) : null}
+              </MediaCard>
+            </Reveal>
           ))}
         </div>
       )}
-    </Section>
+    </Band>
   );
 }
 
@@ -237,7 +268,8 @@ function PortalBand() {
   );
 
   return (
-    <Section
+    <Band
+      surface="muted"
       id="portal"
       eyebrow={t("site.portalBand.eyebrow")}
       title={t("site.portalBand.title")}
@@ -272,7 +304,7 @@ function PortalBand() {
           stages={stages}
         />
       </div>
-    </Section>
+    </Band>
   );
 }
 
@@ -285,13 +317,15 @@ function QuoteBand() {
   const steps = tList<{ t: string; d: string }>("site.quote.steps");
 
   return (
-    <Section
-      id="quote"
-      title={t("site.quote.title")}
-      lead={t("site.quote.sub")}
-      divided
-    >
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+    <Band id="quote" surface="plain" divided>
+      <BadgePill>{t("site.quote.title")}</BadgePill>
+      <SectionHead
+        title={t("site.quote.titleBeforeAccent")}
+        accent={t("site.quote.titleAccent")}
+        lead={t("site.quote.sub")}
+        className="mt-3"
+      />
+      <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
         <Card padded>
           <QuoteWizard services={services} />
         </Card>
@@ -317,7 +351,7 @@ function QuoteBand() {
           </p>
         </div>
       </div>
-    </Section>
+    </Band>
   );
 }
 
@@ -331,9 +365,9 @@ function ContactBand() {
   const promise = tList<{ t: string; d: string }>("site.contact.promise");
 
   return (
-    <Section
+    <Band
+      surface="muted"
       id="contact"
-      variant="muted"
       title={t("site.contact.title")}
       lead={t("site.contact.sub")}
       divided
@@ -351,6 +385,6 @@ function ContactBand() {
           ))}
         </dl>
       </div>
-    </Section>
+    </Band>
   );
 }

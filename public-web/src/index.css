@@ -47,7 +47,7 @@
    base/components/utilities/variants as layer names — a custom one is a build
    error, and the alternative (`@layer tokens;` declared by hand) opts this block
    out of the utilities-win cascade Tailwind is relying on, which is exactly what
-   makes `text-[var(--brand-orange)]` able to override the `.eyebrow` recipe. */
+   makes `text-[rgb(var(--brand-orange))]` able to override the `.eyebrow` recipe. */
 @layer base {
   :root {
     /* ── Tenant layer, light ───────────────────────────────────────────────
@@ -110,14 +110,15 @@
     --mode-rail: 147 51 234;
 
     /* The icon tile (§4 pattern 4). Two surfaces: resting and selected. */
-    --tile-bg:        rgb(var(--ink) / 0.06);
-    --tile-fg:        var(--muted-foreground);
+    --tile-bg: rgb(var(--ink) / 0.06);
+    --tile-fg: var(--muted-foreground);
     --tile-bg-active: var(--brand-orange);
     --tile-fg-active: var(--primary-foreground);
 
     /* Selection. Three signals at once — see §6.2 for why one is not enough. */
-    --pick-ring: 0 0 0 1px var(--brand-orange),
-                 0 8px 24px -12px var(--brand-orange);
+    --pick-ring:
+      0 0 0 1px rgb(var(--brand-orange)),
+      0 8px 24px -12px rgb(var(--brand-orange));
 
     /* Alternating band (§4 pattern 6). */
     --band-surface: var(--secondary);
@@ -371,6 +372,26 @@
   .band-hero {
     background: var(--hero);
     color: var(--hero-foreground);
+  }
+
+  /* Scroll reveal is opt-in after mount. Without JavaScript these classes are
+     never added, so the complete page remains visible to crawlers and readers. */
+  .reveal {
+    --reveal-delay: 0ms;
+  }
+
+  .reveal-pending {
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity 420ms var(--ease),
+      transform 420ms var(--ease);
+    transition-delay: var(--reveal-delay);
+  }
+
+  .reveal-visible {
+    opacity: 1;
+    transform: translateY(0);
   }
 
   .wrap {

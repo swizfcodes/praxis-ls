@@ -89,6 +89,7 @@ const Insights = lazy(
   () => import("@/features/insights/insights-page"),
   "InsightsPage",
 );
+const Quote = lazy(() => import("@/features/quote/quote-page"), "QuotePage");
 const Insight = lazy(
   () => import("@/features/insights/insight-page"),
   "InsightPage",
@@ -179,7 +180,9 @@ export function AppRouter() {
       <Routes>
         {/* At the root `p()` IS "/", and the marketing route below already
             claims it — a redirect here would point at itself. */}
-        {IS_ROOT ? null : <Route path="/" element={<Navigate to={p()} replace />} />}
+        {IS_ROOT ? null : (
+          <Route path="/" element={<Navigate to={p()} replace />} />
+        )}
 
         {/* ── the public site ── */}
         <Route path={p()} element={<Marketing />} />
@@ -193,12 +196,9 @@ export function AppRouter() {
         <Route path={p("/insights/:slug")} element={<Insight />} />
         <Route path={p("/careers")} element={<Careers />} />
         <Route path={p("/careers/:token")} element={<Vacancy />} />
-        {/* The form used to live at its own path; the band on the home page is the
-            same fields, and a bookmark should reach it rather than 404. */}
-        <Route
-          path={p("/quote")}
-          element={<Navigate to={p("#quote")} replace />}
-        />
+        {/* The standalone route keeps the same fields as the home-page band and
+            gives shared quote links a dedicated hero rather than a hash redirect. */}
+        <Route path={p("/quote")} element={<Quote />} />
         <Route
           path={p("/contact")}
           element={<Navigate to={p("#contact")} replace />}
@@ -239,8 +239,14 @@ export function AppRouter() {
             old path is redirected on every host rather than deleted: a URL that
             has been shared or indexed outlives the decision to rename it, and a
             404 is how a rename loses the readers it already had. */}
-        <Route path="/kaizen" element={<Navigate to={p("/insights")} replace />} />
-        <Route path="/kaizen/:slug" element={<LegacyParam to={p("/insights")} />} />
+        <Route
+          path="/kaizen"
+          element={<Navigate to={p("/insights")} replace />}
+        />
+        <Route
+          path="/kaizen/:slug"
+          element={<LegacyParam to={p("/insights")} />}
+        />
         {/* Wrong on EVERY host, root included: `/tracking` was the ERP's spelling
             and `/proposal` the singular the sales team still types. */}
         <Route path="/tracking" element={<LegacyQuery to={p("/track")} />} />

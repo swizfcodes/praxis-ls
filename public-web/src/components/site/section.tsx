@@ -1,6 +1,8 @@
 import * as React from "react";
 import { Link } from "react-router-dom";
 import { ArrowRightIcon } from "@/components/ui/icons";
+import { IconTile } from "@/components/ui/icon-tile";
+import { SectionHead } from "@/components/ui/section-head";
 import { cn } from "@/lib/cn";
 
 /**
@@ -64,33 +66,20 @@ export function Section({
       className={cn(band, "scroll-mt-24", divided && "rule-top", className)}
     >
       <div className="wrap py-band">
-        {(eyebrow || title || aside) && (
+        {(eyebrow || title || lead || aside) && (
           <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-            <div className="max-w-prose">
-              {eyebrow && <p className="eyebrow">{eyebrow}</p>}
-              {title && (
-                <Tag
-                  className={cn(
-                    "section-title mt-2",
-                    variant === "dark" ? "text-[var(--hero-foreground)]" : "",
-                  )}
-                >
-                  {title}
-                </Tag>
+            <SectionHead
+              eyebrow={eyebrow}
+              title={title}
+              lead={lead}
+              titleAs={Tag === "h1" ? "h1" : Tag === "h3" ? "h3" : "h2"}
+              hero={variant === "dark"}
+              className={cn(
+                "max-w-prose",
+                variant === "dark" &&
+                  "text-[var(--hero-foreground)] [&>p:first-child]:text-[rgb(var(--brand-orange))] [&>p:last-child]:text-[var(--hero-muted)]",
               )}
-              {lead && (
-                <p
-                  className={cn(
-                    "mt-3 text-lg",
-                    variant === "dark"
-                      ? "text-[var(--hero-muted)]"
-                      : "text-muted-foreground",
-                  )}
-                >
-                  {lead}
-                </p>
-              )}
-            </div>
+            />
             {aside && <div className="shrink-0">{aside}</div>}
           </div>
         )}
@@ -105,9 +94,12 @@ export function Section({
  *  (`portfolio_public` and `service_type_web_public` both null out anything their
  *  allowlist would refuse) — a broken image frame on a sales page is worse than
  *  no image, which is why there is no `onError` fallback here. */
+type CardIcon = React.ComponentType<{ size?: number; className?: string }>;
+
 export function MediaCard({
   image,
   imageAlt,
+  icon: Icon,
   eyebrow,
   title,
   children,
@@ -118,6 +110,7 @@ export function MediaCard({
 }: {
   image?: string | null;
   imageAlt?: string;
+  icon?: CardIcon;
   eyebrow?: React.ReactNode;
   title: React.ReactNode;
   children?: React.ReactNode;
@@ -140,7 +133,12 @@ export function MediaCard({
         </div>
       ) : null}
       <div className="flex flex-1 flex-col p-5">
-        {eyebrow && <p className="micro mb-2">{eyebrow}</p>}
+        {(Icon || eyebrow) && (
+          <div className="mb-2 flex items-center gap-3">
+            {Icon && <IconTile icon={Icon} size="sm" />}
+            {eyebrow && <p className="micro">{eyebrow}</p>}
+          </div>
+        )}
         <h3 className="text-title font-semibold leading-snug tracking-tight">
           {title}
         </h3>

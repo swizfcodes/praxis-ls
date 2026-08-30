@@ -7,7 +7,10 @@ import { currentLocale, tStatic } from "@/lib/i18n";
 import { enumText, withScheme } from "@/lib/format";
 import { useIntake } from "@/lib/use-intake";
 import { PageContainer, PageShell } from "@/components/site/page-shell";
-import { Section } from "@/components/site/section";
+import { Band } from "@/components/ui/band";
+import { IconTile } from "@/components/ui/icon-tile";
+import { SectionHead } from "@/components/ui/section-head";
+import { Reveal } from "@/components/ui/reveal";
 import { Card } from "@/components/ui/card";
 import { Panel } from "@/components/ui/panel";
 import { Button } from "@/components/ui/button";
@@ -17,7 +20,16 @@ import { EmptyState, ErrorState, SuccessState } from "@/components/state";
 import { PageSkeleton } from "@/components/ui/skeleton";
 import { Chip } from "@/components/ui/pill";
 import { Markdown } from "@/components/ui/markdown";
-import { AlertIcon, ClockIcon, DocumentIcon } from "@/components/ui/icons";
+import {
+  AlertIcon,
+  BoxIcon,
+  ClockIcon,
+  DocumentIcon,
+  PlaneIcon,
+  ShipIcon,
+  TruckIcon,
+  WarehouseIcon,
+} from "@/components/ui/icons";
 import { useDocumentMeta } from "@/lib/use-document-meta";
 import { p } from "@/lib/base-path";
 
@@ -83,14 +95,13 @@ export function CareersPage() {
 
   return (
     <PageShell label={t("site.careers.title")}>
-      <Section
-        eyebrow={t("site.careers.list")}
-        title={t("site.careers.title")}
-        lead={t("site.careers.sub")}
-        // No hero band on the list page: this heading is the page title, so
-        // it is the document h1 (see Section on why titleAs accepts one).
-        titleAs="h1"
-      >
+      <Band surface="plain">
+        <SectionHead
+          eyebrow={t("site.careers.list")}
+          title={t("site.careers.title")}
+          lead={t("site.careers.sub")}
+          titleAs="h1"
+        />
         {error ? (
           <ErrorState message={error} />
         ) : rows === null ? (
@@ -101,30 +112,48 @@ export function CareersPage() {
             hint={t("site.careers.emptyHint")}
           />
         ) : (
-          <ul className="divide-y divide-[var(--border)] border-y border-[var(--border)]">
-            {rows.map((v) => (
+          <ul className="mt-8 divide-y divide-[var(--border)] border-y border-[var(--border)]">
+            {rows.map((v, i) => (
               <li key={v.token}>
-                <Link
-                  to={p(`/careers/${encodeURIComponent(v.token)}`)}
-                  className="group flex flex-col gap-2 py-6 transition-colors sm:flex-row sm:items-start sm:justify-between sm:gap-8"
-                >
-                  <div className="min-w-0">
-                    <h2 className="text-title font-semibold leading-snug tracking-tight group-hover:text-primary-ink">
-                      {v.title}
-                    </h2>
-                    <VacancyFacts v={v} />
-                  </div>
-                  <span className="shrink-0 text-sm font-medium text-primary-ink underline-offset-4 group-hover:underline">
-                    {t("site.careers.apply")}
-                  </span>
-                </Link>
+                <Reveal delay={i % 3}>
+                  <Link
+                    to={p(`/careers/${encodeURIComponent(v.token)}`)}
+                    className="group flex flex-col gap-4 py-6 transition-colors sm:flex-row sm:items-start sm:justify-between sm:gap-8"
+                  >
+                    <div className="flex min-w-0 items-start gap-4">
+                      <IconTile icon={departmentIcon(v.department)} size="sm" />
+                      <div className="min-w-0">
+                        <h2 className="text-title font-semibold leading-snug tracking-tight group-hover:text-primary-ink">
+                          {v.title}
+                        </h2>
+                        <VacancyFacts v={v} />
+                      </div>
+                    </div>
+                    <span className="shrink-0 text-sm font-medium text-primary-ink underline-offset-4 group-hover:underline">
+                      {t("site.careers.apply")}
+                    </span>
+                  </Link>
+                </Reveal>
               </li>
             ))}
           </ul>
         )}
-      </Section>
+      </Band>
     </PageShell>
   );
+}
+
+/** Choose a stable decorative mark from the department label. The API keeps the
+ *  department as tenant-authored text, so this is intentionally a small semantic
+ *  mapping rather than a second translated department catalogue. */
+function departmentIcon(department?: string | null) {
+  const value = String(department || "").toLocaleLowerCase();
+  if (/(custom|compliance|douane|administr)/.test(value)) return DocumentIcon;
+  if (/(warehouse|storage|entrepos|magasin)/.test(value)) return WarehouseIcon;
+  if (/(air|a[eé]rien|a[eé]ro)/.test(value)) return PlaneIcon;
+  if (/(sea|maritime|ocean|oc[eé]an|port)/.test(value)) return ShipIcon;
+  if (/(road|rail|transport|route|ferro)/.test(value)) return TruckIcon;
+  return BoxIcon;
 }
 
 /** Department · location · type · experience · salary, as chips.
@@ -201,7 +230,8 @@ export function VacancyPage() {
     // on it. Say it closed, offer the list, invent nothing about why.
     return (
       <PageShell label={t("site.careers.title")}>
-        <Section
+        <Band
+          surface="plain"
           title={gone ? t("site.careers.closed") : t("site.careers.title")}
         >
           <div className="max-w-prose">
@@ -218,7 +248,7 @@ export function VacancyPage() {
               </ButtonLink>
             </div>
           </div>
-        </Section>
+        </Band>
       </PageShell>
     );
   }
@@ -236,8 +266,8 @@ export function VacancyPage() {
 
   return (
     <PageShell label={v.title}>
-      <section className="band">
-        <PageContainer size="reading">
+      <Band surface="plain">
+        <div className="max-w-reading">
           <nav aria-label={t("site.careers.title")} className="mb-6">
             <Link
               to={p("/careers")}
@@ -257,9 +287,11 @@ export function VacancyPage() {
             </p>
           )}
 
-          <h1 className="text-h1 font-semibold leading-[1.08] tracking-tight">
-            {v.title}
-          </h1>
+          <SectionHead
+            eyebrow={t("site.careers.title")}
+            title={v.title}
+            titleAs="h1"
+          />
           <VacancyFacts v={v} />
           {(published || closes) && (
             <p className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-muted-foreground">
@@ -278,10 +310,10 @@ export function VacancyPage() {
               ) : null}
             </p>
           )}
-        </PageContainer>
-      </section>
+        </div>
+      </Band>
 
-      <Section divided>
+      <Band surface="muted" divided>
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
           <div className="min-w-0 max-w-prose">
             {v.description ? (
@@ -322,7 +354,7 @@ export function VacancyPage() {
             <ApplyForm key={v.token} vacancy={v} />
           </Card>
         </div>
-      </Section>
+      </Band>
     </PageShell>
   );
 }

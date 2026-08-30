@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { PageShell } from "@/components/site/page-shell";
-import { Section } from "@/components/site/section";
+import { Band } from "@/components/ui/band";
 import { useDocumentMeta } from "@/lib/use-document-meta";
 import { p } from "@/lib/base-path";
 
@@ -26,7 +26,8 @@ export function NotFoundPage() {
 
   return (
     <PageShell label={t("site.notFound.title")}>
-      <Section
+      <Band
+        surface="plain"
         title={t("site.notFound.title")}
         lead={t("site.notFound.hint")}
         titleAs="h1"
@@ -45,7 +46,7 @@ export function NotFoundPage() {
             {t("site.track.title")}
           </Link>
         </div>
-      </Section>
+      </Band>
     </PageShell>
   );
 }

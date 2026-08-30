@@ -7,8 +7,8 @@ import { getLang, tStatic } from "@/lib/i18n";
 import { dateFmt, dateTimeFmt } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { p } from "@/lib/base-path";
-import { PageContainer, PageShell } from "@/components/site/page-shell";
-import { Section } from "@/components/site/section";
+import { PageShell } from "@/components/site/page-shell";
+import { Band } from "@/components/ui/band";
 import { Card } from "@/components/ui/card";
 import { Button, ButtonLink } from "@/components/ui/button";
 import {
@@ -25,6 +25,9 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusPill } from "@/components/ui/pill";
 import { TrackWidget } from "@/components/site/track-widget";
+import { BgMap } from "@/components/ui/bg-map";
+import { SectionHead } from "@/components/ui/section-head";
+import { IconTile } from "@/components/ui/icon-tile";
 
 /**
  * `/public/track` — the public lookup, and the page most visitors of this whole
@@ -111,26 +114,30 @@ export function TrackPage() {
 
   return (
     <PageShell label={t("site.trackPage.title")} footer>
-      <section className="band-hero">
-        <PageContainer>
-          <p className="eyebrow text-[var(--brand-orange)]">
-            {t("site.track.kicker")}
-          </p>
-          <h1 className="hero-title mt-3 text-[var(--hero-foreground)]">
-            {t("site.trackPage.title")}
-          </h1>
-          <p className="mt-4 max-w-measure text-[var(--hero-muted)]">
-            {t("site.trackPage.sub")}
-          </p>
+      <Band surface="hero" className="relative overflow-hidden">
+        <BgMap />
+        <div className="relative z-10">
+          <SectionHead
+            eyebrow={t("site.track.kicker")}
+            title={t("site.trackPage.titleBeforeAccent")}
+            accent={t("site.trackPage.titleAccent")}
+            lead={t("site.trackPage.sub")}
+            titleAs="h1"
+            hero
+            className="text-[var(--hero-foreground)] [&>p:first-child]:text-[rgb(var(--brand-orange))] [&>p:last-child]:text-[var(--hero-muted)]"
+          />
           <div className="mt-7 max-w-2xl">
             <TrackWidget variant="page" onDark />
           </div>
-        </PageContainer>
-      </section>
+        </div>
+      </Band>
 
-      <Section>
+      <Band surface="plain">
         {state.kind === "idle" ? (
-          <EmptyState title={t("site.track.empty")} hint={t("site.track.hint")} />
+          <EmptyState
+            title={t("site.track.empty")}
+            hint={t("site.track.hint")}
+          />
         ) : state.kind === "loading" ? (
           <TrackingSkeleton />
         ) : state.kind === "notfound" ? (
@@ -165,7 +172,7 @@ export function TrackPage() {
         ) : (
           <TrackingView view={state.view} reference={ref} />
         )}
-      </Section>
+      </Band>
     </PageShell>
   );
 }
@@ -180,7 +187,10 @@ export function TrackPage() {
  */
 function TrackingSkeleton() {
   return (
-    <LoadingState label={tStatic("site.trackPage.loading")} className="space-y-6">
+    <LoadingState
+      label={tStatic("site.trackPage.loading")}
+      className="space-y-6"
+    >
       <Card padded>
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
@@ -245,10 +255,16 @@ function TrackingView({
               {view.reference || reference}
             </h2>
             {view.service_type ? (
-              <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-                <ModeIcon
-                  mode={view.service_type.mode}
-                  className="text-[var(--brand-orange)]"
+              <p className="mt-2 flex items-center gap-2.5 text-sm text-muted-foreground">
+                <IconTile
+                  size="sm"
+                  icon={({ size, className }) => (
+                    <ModeIcon
+                      mode={view.service_type?.mode}
+                      size={size}
+                      className={className}
+                    />
+                  )}
                 />
                 <span className="min-w-0 truncate">
                   {serviceName || view.service_type.key}
@@ -313,7 +329,7 @@ function TrackingView({
             aria-label={t("site.trackPage.progress")}
           >
             <div
-              className="h-full rounded-full bg-[var(--brand-orange)] transition-[width] duration-500 ease-[var(--ease)]"
+              className="h-full rounded-full bg-[rgb(var(--brand-orange))] transition-[width] duration-500 ease-[var(--ease)]"
               style={{ width: `${percent}%` }}
             />
           </div>
@@ -321,7 +337,9 @@ function TrackingView({
               derives this from the latest completion for that reason. Absent
               rather than faked while nothing has completed. */}
           <p className="mt-3 text-xs text-muted-foreground">
-            <span className="micro mr-1.5">{t("site.trackPage.lastUpdate")}</span>
+            <span className="micro mr-1.5">
+              {t("site.trackPage.lastUpdate")}
+            </span>
             {view.last_update ? (
               <time dateTime={view.last_update} className="num">
                 {dateTimeFmt(view.last_update)}
@@ -353,7 +371,7 @@ function TrackingView({
                       className={cn(
                         "absolute left-3 top-7 -ml-px h-[calc(100%-1.75rem)] w-px",
                         state === "COMPLETED"
-                          ? "bg-[var(--brand-orange)]"
+                          ? "bg-[rgb(var(--brand-orange))]"
                           : "bg-border",
                       )}
                     />

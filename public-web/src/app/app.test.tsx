@@ -85,6 +85,7 @@ const ROUTES: Case[] = [
     h1: "max",
   },
   { path: "/public/insights", shows: "site.insights.title", h1: 1 },
+  { path: "/public/quote", shows: "site.quote.title", h1: 1 },
   // Fetch is stubbed to 404 everything here, and a 404 on an article is a
   // CONTENT state — the link is old or mistyped, or the piece is a draft, which
   // the API refuses to distinguish. So the page must render its own designed
